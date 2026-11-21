@@ -1,0 +1,81 @@
+Architecture Hierarchy:
+
+ Cluster
+    |
+    |
+    V
+   Node
+    |
+    |
+    V
+Database
+    |
+    |
+    V
+Collection
+    |
+    |
+    V
+Document
+
+Documents are the smallest unit of data in MongoDB.
+
+They store information about an object and its related metadata as field-value pairs. The values can be a variety of data types, including strings, numbers, dates, arrays, and more.
+
+Documents are grouped into collections.
+
+A collection is a group of documents that typically correspond to an entity in our data model.
+
+Next, a group of collections is housed by a database.
+
+Typically, when we talk about a database we're referring to a database management system (or DBMS) like MongoDB or PostgreSQL. But in the context of MongoDB, a database is simply a group of collections.
+
+The next two levels of our architectural hierarchy are essential for understanding how MongoDB functions as a distributed system.
+
+This simply means that instead of storing all your data on a single machine, MongoDB spreads it out across multiple nodes or servers, often in different locations. This approach is crucial for achieving high availability and horizontal scaling.
+
+A node refers to an individual MongoDB instance. This instance can be running on a physical machine, a virtual machine, or within a container.
+
+The next level up is a cluster and this is a group of MongoDB nodes. There are two main types of clusters in MongoDB, replica sets and sharded clusters. Let’s talk about both.
+
+Replica sets help MongoDB achieve high availability through a process called replication.
+
+Replication is the process of storing multiple copies of data and keeping them synchronized across multiple nodes to provide redundancy.
+
+Because the same data is stored on multiple nodes, the database will continue to run as expected even if one of the nodes experiences a failure and goes offline. This process makes data highly available.
+While replication ensures reliability, sharding is what allows large datasets to scale horizontally and handle massive amounts of data.
+
+Sharding distributes your data across multiple servers using shard keys to determine data placement.
+
+Each shard operates as its own replica set so that it can maintain the high availability we just discussed.
+
+Your application interacts with your sharded cluster through a query router called mongos, which directs client requests to the appropriate shards.
+
+As your dataset grows, you can add more shards to distribute the data and the load.
+
+However, it's essential to keep in mind that sharding in MongoDB requires careful planning because it adds complexity to your deployments and is not always required.
+
+We've covered how replica sets provide high availability through replication, and how sharded clusters enable horizontal scaling through sharding.
+
+These core architectural features not only handle traditional data but also provide the foundation for modern AI workloads.
+
+MongoDB's architecture offers native support for this new generation of applications. For instance, vector embeddings—numerical representations of data—can be stored directly in MongoDB documents and indexed for fast semantic searches.
+
+This allows users to search by meaning and context, rather than just keywords, creating more intelligent applications with smarter product recommendations and search experiences.
+
+Vector Search is available across all MongoDB deployment options, giving you the flexibility to choose the approach that best fits your needs.
+
+MongoDB provides three primary paths for running your database: MongoDB Atlas, the Community Server, and Enterprise Advanced.
+
+MongoDB Atlas is a cloud-based database-as-a-service that simplifies database management by automating deployment, scaling, monitoring, backups, and security, allowing you to focus on application development.
+
+MongoDB Atlas runs on major cloud providers and offers flexible tiers for development or dedicated clusters for production.
+
+Next, MongoDB Community Server is a free, self-managed version of MongoDB that lets you install and control the database on your own hardware or virtual machines. It's ideal for development, testing, and smaller projects, offering core MongoDB features, including Atlas Search and vector search.
+
+Finally, MongoDB Enterprise Advanced is a paid, on-premise version of MongoDB that includes extra security, management tools, and support beyond what’s offered in the free Community Server for mission-critical applications, compliance requirements, and enterprise-grade deployments.
+
+
+
+
+

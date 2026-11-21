@@ -88,17 +88,353 @@ MongoDB's document model is a great fit for generative AI because it handles uns
 
 ==================================================================================================
 
-Data Modelling in MONGODB:
+MONGODB – DATA MODELLING
 
-Data accessed together should be stored together.
+1. WHAT IS DATA MODELLING?
 
+Data modelling is the process of deciding how data should be organized,
+structured, stored, and connected inside a database.
 
-Entities and Attributes
+MongoDB is a document-oriented NoSQL database. It stores data as BSON
+documents inside collections.
 
-An entity is a unique and independent object or concept in your application, like a user, a product, or a blog post. In MongoDB, entities are typically represented as documents and are organized into collections.
+CORE PRINCIPLE: “Data that is accessed together should ideally be stored
+together.”
 
-Data Relationships:
+Example: In a movie application, when a user opens a movie page, the
+application may need the movie title, genre, rating, release year, and
+cast members. If these details are commonly accessed together, we may
+store them in one document.
 
-One-to-one
-many-tomany
-one-to-many
+2. ENTITIES AND ATTRIBUTES
+
+ENTITY: An entity is a distinct object or concept about which an
+application stores information.
+
+Examples: - Movie - User - Product - Order - Comment
+
+In MongoDB: - A collection stores documents of a similar type. - Each
+document generally represents one instance of an entity.
+
+ATTRIBUTE: An attribute is a property or characteristic that describes
+an entity.
+
+Example – Movie entity: - movie_id - title - genre - release_year -
+rating - cast
+
+MongoDB represents attributes as field-value pairs inside a document.
+
+Example document:
+
+{ “_id”: 101, “title”: “Inception”, “genre”: “Sci-Fi”, “release_year”:
+2010, “rating”: 8.8 }
+
+IMPORTANT TERMS: - Entity = What we want to store. - Collection = A
+group of related documents. - Document = An individual record. - Field =
+An attribute inside a document. - _id = Unique identifier of a document.
+
+NOTEBOOK DIAGRAM:
+
+        ENTITY: MOVIE
+              |
+              v
+       COLLECTION: movies
+              |
+              v
+       DOCUMENT (one movie)
+              |
+              v
+       FIELDS / ATTRIBUTES
+       title, genre, rating, year
+
+3. DATA RELATIONSHIPS
+
+A relationship describes how documents or entities are associated with
+one another.
+
+The three common relationship types are: 1. One-to-One (1:1) 2.
+One-to-Many (1:N) 3. Many-to-Many (M:N)
+
+MongoDB can represent relationships mainly through: - Embedding -
+Referencing
+
+3A. ONE-TO-ONE (1:1)
+
+One document is associated with one other document.
+
+Example: One user has one profile, and each profile belongs to one user.
+
+DIAGRAM:
+
+       USER
+
+(user_id: 101) | | 1 : 1 | PROFILE (profile_id: 501)
+
+EMBEDDING EXAMPLE:
+
+{ “_id”: 101, “name”: “Archit”, “email”: “archit@example.com”,
+“profile”: { “city”: “Bangalore”, “occupation”: “Engineer” } }
+
+The profile is stored as a nested document inside the user document.
+
+Use embedding when the profile is usually accessed together with the
+user and does not need to be managed independently.
+
+Referencing is also possible if the profile needs to be stored or
+managed separately.
+
+3B. ONE-TO-MANY (1:N)
+
+One document is associated with multiple documents.
+
+Example: One movie can have many comments, but each comment belongs to
+one movie.
+
+DIAGRAM:
+
+             MOVIE
+          (movie_id: 101)
+                |
+        +-------+-------+
+        |       |       |
+        v       v       v
+     COMMENT COMMENT COMMENT
+       1       2       3
+
+OPTION 1 – EMBEDDING:
+
+{ “_id”: 101, “title”: “Inception”, “comments”: [ { “user”: “Archit”,
+“text”: “Great movie!” }, { “user”: “Rahul”, “text”: “Amazing movie!” }
+] }
+
+Comments are stored inside the movie document.
+
+Use embedding when the number of related records is small or bounded and
+they are commonly read with the parent document.
+
+OPTION 2 – REFERENCING:
+
+Movies collection:
+
+{ “_id”: 101, “title”: “Inception” }
+
+Comments collection:
+
+{ “_id”: 501, “movie_id”: 101, “user”: “Archit”, “text”: “Great movie!”
+}
+
+The movie_id field connects the comment to its movie.
+
+Use referencing when comments can grow without a practical limit, are
+queried independently, or need separate management.
+
+3C. MANY-TO-MANY (M:N)
+
+Multiple documents in one collection can be associated with multiple
+documents in another collection.
+
+Example: - One student can enroll in many courses. - One course can have
+many students.
+
+DIAGRAM:
+
+  STUDENTS        COURSES
+  --------------- ---------
+  Archit ————–>   MongoDB
+  ————–>          Python
+
+Rahul ————–> MongoDB ————–> SQL
+
+A many-to-many relationship is commonly modelled using references.
+
+OPTION 1 – STORE COURSE IDS IN STUDENT DOCUMENT:
+
+Students collection:
+
+{ “_id”: 101, “name”: “Archit”, “course_ids”: [201, 202] }
+
+Courses collection:
+
+{ “_id”: 201, “course_name”: “MongoDB” }
+
+{ “_id”: 202, “course_name”: “Python” }
+
+OPTION 2 – USE A SEPARATE ENROLLMENTS COLLECTION:
+
+{ “_id”: 501, “student_id”: 101, “course_id”: 201, “enrollment_date”:
+“2026-11-21”, “status”: “active” }
+
+A separate relationship collection is useful when the relationship
+itself has attributes, such as enrollment date, grade, or status.
+
+4. EMBEDDING
+
+Embedding means storing related information inside the same MongoDB
+document using nested documents or arrays.
+
+EXAMPLE:
+
+{ “_id”: 101, “title”: “Inception”, “genre”: “Sci-Fi”, “cast”: [ {
+“name”: “Actor One”, “role”: “Cobb” }, { “name”: “Actor Two”, “role”:
+“Arthur” } ] }
+
+DIAGRAM:
+
+       MOVIE DOCUMENT
+       --------------
+       title: Inception
+       genre: Sci-Fi
+       cast:
+         |
+         +-- Actor One
+         |
+         +-- Actor Two
+
+ADVANTAGES: - Related data can be retrieved in one query. - Often
+improves read performance when data is accessed together. - Fewer
+separate database queries are needed. - Updates to one document are
+atomic.
+
+DISADVANTAGES: - Documents can become very large. - Repeated data can
+cause duplication. - Updating duplicated information in several
+documents can be difficult. - Unbounded arrays can create document
+growth problems.
+
+Use embedding when related data is small or bounded and is commonly
+accessed with its parent document.
+
+5. REFERENCING
+
+Referencing means storing related data in separate documents and
+connecting them using document IDs.
+
+EXAMPLE:
+
+Movies collection:
+
+{ “_id”: 101, “title”: “Inception”, “cast_ids”: [301, 302] }
+
+Actors collection:
+
+{ “_id”: 301, “name”: “Actor One” }
+
+{ “_id”: 302, “name”: “Actor Two” }
+
+DIAGRAM:
+
+       MOVIES COLLECTION
+       -----------------
+       Inception
+       cast_ids: [301, 302]
+               |
+          REFERENCES
+           /     \
+          v       v
+      ACTOR 301  ACTOR 302
+      Actor One  Actor Two
+
+ADVANTAGES: - Reduces unnecessary duplication. - Related data can be
+managed independently. - Useful for large or independently queried
+datasets. - Helps avoid unbounded growth inside a single document.
+
+DISADVANTAGES: - Retrieving related data may require additional
+queries. - Queries can be more complex. - A $lookup may be needed to
+combine data from collections.
+
+Use referencing when related data is large, independently accessed,
+shared across multiple entities, or changes independently.
+
+6. EMBEDDING VS REFERENCING
+
+EMBEDDING: - Data is stored inside the same document. - Often faster and
+simpler when related data is read together. - Can duplicate data. -
+Document size and array growth must be controlled. - Best for closely
+related, bounded data.
+
+REFERENCING: - Data is stored in separate documents. - Documents are
+connected using IDs. - Reduces duplication in many designs. - May
+require extra queries or $lookup. - Best for large, independent, shared,
+or unbounded data.
+
+IMPORTANT: Referencing is not always better for large datasets, and
+embedding is not always faster. The correct choice depends on
+application query patterns, data growth, update patterns, and
+consistency requirements.
+
+7. HOW TO CHOOSE BETWEEN EMBEDDING AND REFERENCING
+
+Ask these questions while designing a MongoDB schema:
+
+1.  Is the related data usually accessed together?
+    -   If yes, consider embedding.
+2.  Can the related array grow without a practical limit?
+    -   If yes, consider referencing.
+3.  Is the related data accessed or updated independently?
+    -   If yes, consider referencing.
+4.  Is the same information shared by many documents?
+    -   Referencing may reduce duplication.
+5.  Does the relationship have its own attributes?
+    -   Consider a separate relationship collection.
+
+GENERAL RULE: Embed related data when it is bounded and commonly used
+with the parent. Reference related data when it is independent, shared,
+or potentially unbounded.
+
+  8. MONGODB $lookup
+  ----------------------------------------------------------------------------------------------------------
+  $lookup is an aggregation stage used to combine documents from two collections based on matching fields.
+
+It is similar to a LEFT OUTER JOIN in relational databases.
+
+EXAMPLE:
+
+db.movies.aggregate([ { $lookup: { from: “comments”, localField: “_id”,
+foreignField: “movie_id”, as: “movie_comments” } }])
+
+EXPLANATION: - from: Collection to join with. - localField: Field from
+the current collection. - foreignField: Matching field in the other
+collection. - as: Name of the output array containing matching
+documents.
+
+In this example: - MongoDB reads documents from the movies collection. -
+It matches movies._id with comments.movie_id. - Matching comments are
+placed in the movie_comments array.
+
+9. IMPORTANT MONGODB TERMS
+
+Database: A container that holds collections.
+
+Collection: A group of MongoDB documents.
+
+Document: A BSON record stored in a collection.
+
+Field: A key-value pair inside a document.
+
+_id: The unique identifier of a document. MongoDB automatically creates
+an ObjectId if an _id is not provided.
+
+Embedded document: A nested document stored inside another document.
+
+Reference: An ID stored in a document to connect it to another document.
+
+$lookup: An aggregation stage used to combine data from collections.
+
+10. QUICK REVISION
+
+1:1 = One user has one profile. 1:N = One movie has many comments. M:N =
+Many students enroll in many courses.
+
+Embedding: Store related data inside the same document.
+
+Referencing: Store related data separately and connect it using IDs.
+
+$lookup: Combine related documents from different collections during
+aggregation.
+
+MOST IMPORTANT PRINCIPLE: “Data that is accessed together should ideally
+be stored together.”
+
+Always design the schema around how the application reads and writes
+data, rather than simply copying relational database design into
+MongoDB.
+
